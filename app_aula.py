@@ -226,12 +226,19 @@ with tab2:
 
         with analysis_tab4:
             st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
-            features_to_plot = ['Income', 'Age', 'Total_Purchases', 'MntWines'] 
-            for feature in features_to_plot:
-                fig, ax = plt.subplots(figsize=(7, 4))
-                sns.boxplot(data=Xtest, x='Predicted_Class', y=feature, ax=ax, palette="deep")
-                plt.title(f'Box Plot - {feature} by Predicted Class', fontsize=14)
-                ax.set_xlabel('Predicted Class', fontsize=12)
-                ax.set_ylabel(feature, fontsize=12)
-                ax.tick_params(axis='both', which='major', labelsize=10)
-                st.pyplot(fig)
+            features_to_plot = ['Income', 'Age', 'Total_Purchases', 'MntWines']
+            if 'Predicted_Class' in Xtest.columns and all(feature in Xtest.columns for feature in features_to_plot):
+                for feature in features_to_plot:
+                    if pd.api.types.is_numeric_dtype(Xtest[feature]):
+                        fig, ax = plt.subplots(figsize=(7, 4))
+                        sns.boxplot(data=Xtest, x='Predicted_Class', y=feature, ax=ax, palette="deep")
+                        plt.title(f'Box Plot - {feature} by Predicted Class', fontsize=14)
+                        ax.set_xlabel('Predicted Class', fontsize=12)
+                        ax.set_ylabel(feature, fontsize=12)
+                        ax.tick_params(axis='both', which='major', labelsize=10)
+                        st.pyplot(fig)
+                    else:
+                        st.error(f"Erro: A coluna {feature} não é numérica e não pode ser usada em um boxplot.")
+            else:
+                missing_columns = [col for col in ['Predicted_Class'] + features_to_plot if col not in Xtest.columns]
+                st.error(f"Erro: Falta(m) a(s) seguinte(s) coluna(s) no DataFrame: {', '.join(missing_columns)}")
