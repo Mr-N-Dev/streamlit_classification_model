@@ -32,6 +32,17 @@ with st.sidebar:
     if database == 'CSV':
         st.info('Upload do CSV')
         file = st.file_uploader('Selecione o arquivo CSV', type='csv')
+        if file:
+            Xtest = pd.read_csv(file)
+            # Verifique e crie a coluna Total_Purchases se as colunas necessárias estiverem presentes
+            purchase_columns = ['MntFishProducts', 'MntFruits', 'MntGoldProds', 'MntMeatProducts', 'MntSweetProducts', 'MntWines']
+            if all(col in Xtest.columns for col in purchase_columns):
+                Xtest['Total_Purchases'] = Xtest[purchase_columns].sum(axis=1)
+            else:
+                missing_cols = [col for col in purchase_columns if col not in Xtest.columns]
+                st.error(f"Missing columns in the CSV file: {', '.join(missing_cols)}")
+                # Saia cedo se colunas estão faltando
+                st.stop()
 
 # Abas principais
 tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
