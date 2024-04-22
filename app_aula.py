@@ -203,21 +203,26 @@ with tab2:
             else:
                 st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
 
-      
 
-        with analysis_tab3:
-            st.subheader("Relação entre Renda e Idade com Cor de Classe Predita")
-            chart = alt.Chart(Xtest).mark_circle().encode(
-                x='Income',
-                y='Age',
-                color='Predicted_Class:N',
-                tooltip=['Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted_Class']
-            ).properties(
-                width=800,
-                height=400,
-                title='Relationship between Income and Age with Predicted Class Color'
-            )
-            st.altair_chart(chart, use_container_width=True)
+      with analysis_tab3:
+          st.subheader("Relação entre Renda e Idade com Cor de Classe Predita")
+          # Primeiro, vamos verificar se todas as colunas necessárias estão presentes
+          if all(col in Xtest.columns for col in ['Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted_Class']):
+              # Especificando os tipos de cada campo para garantir que Altair os processe corretamente
+              chart = alt.Chart(Xtest).mark_circle().encode(
+                  x=alt.X('Income:Q', title='Income'),  # :Q porque Income é uma variável quantitativa
+                  y=alt.Y('Age:Q', title='Age'),  # :Q porque Age é uma variável quantitativa
+                  color=alt.Color('Predicted_Class:N', title='Predicted Class'),  # :N porque é nominal
+                  tooltip=[alt.Tooltip('Income:Q'), alt.Tooltip('Age:Q'), alt.Tooltip('Recency:Q'), alt.Tooltip('Total_Purchases:Q'), alt.Tooltip('Predicted_Class:N')]
+              ).properties(
+                  width=800,
+                  height=400,
+                  title='Relationship between Income and Age with Predicted Class Color'
+              )
+              st.altair_chart(chart, use_container_width=True)
+          else:
+              st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame. Verifique as colunas 'Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted Class'.")
+          
 
         with analysis_tab4:
             st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
