@@ -89,12 +89,13 @@ with tab1:
         # Implementação para o modo 'Online' vem aqui.
 
 with tab2:
-    if database == 'CSV' and file and Xtest is not None:
+  if database == 'CSV' and file and Xtest is not None:
         st.header("Análise Detalhada")
-        analysis_tab1, analysis_tab2, analysis_tab3, analysis_tab4 = st.tabs(["Gráfico de Dispersão Plotly 1", "Gráfico de Dispersão Plotly 2", "Gráfico Altair", "Box Plot Seaborn"])
+        analysis_tab1, analysis_tab2, analysis_tab3, analysis_tab4 = st.tabs(
+            ["Gráfico de Dispersão Plotly 1", "Gráfico de Dispersão Plotly 2", "Gráfico Altair", "Box Plot Seaborn"])
 
-      with analysis_tab1:
-          st.subheader("Relação entre Recency e Income")
+        with analysis_tab1:
+            st.subheader("Relação entre Recency e Income")
             fig = px.scatter(
                 Xtest,
                 x="Recency",
@@ -104,8 +105,8 @@ with tab2:
             )
             st.plotly_chart(fig, use_container_width=True)
 
-      with analysis_tab2:
-          st.subheader("Dispersão de Recency, Income e Total Purchases")
+        with analysis_tab2:
+            st.subheader("Dispersão de Recency, Income e Total Purchases")
             fig = px.scatter(
                 Xtest,
                 x="Recency",
