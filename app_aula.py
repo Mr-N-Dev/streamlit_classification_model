@@ -36,18 +36,12 @@ with st.sidebar:
 # Abas principais
 tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
 
-with tab1: 
-    file = st.file_uploader('Selecione o arquivo CSV', type='csv')
+with tab1:
     if database == 'CSV':
         if file:
-            #carregamento do CSV
             Xtest = pd.read_csv(file)
-
-            #carregamento / instanciamento do modelo pkl
             mdl_lgbm = load_model('./pickle_lgbm_pycaret')
-
-            #predict do modelo
-            ypred = predict_model(mdl_lgbm, data = Xtest, raw_score = True)
+            ypred = predict_model(mdl_lgbm, data=Xtest, raw_score=True)
 
             with st.expander('Visualizar CSV carregado:', expanded = False):
                 c1, _ = st.columns([2,4])
