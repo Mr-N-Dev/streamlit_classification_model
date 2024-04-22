@@ -239,4 +239,5 @@ with tab2:
                         st.error(f"Erro: A coluna {feature} não é numérica e não pode ser usada em um boxplot.")
             else:
                 missing_columns = [col for col in features_to_plot if col not in Xtest.columns]
-                st.error(f"Erro: Falta(m) a(s) seguinte(s) col
+                st.error(f"Erro: Falta(m) a(s) seguinte(s) coluna(s) no DataFrame: {', '.join(missing_columns)}")
+
