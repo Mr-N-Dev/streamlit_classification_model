@@ -39,6 +39,7 @@ tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
 with tab1:
     if database == 'CSV':
         if file:
+            Xtest['Total_Purchases'] = Xtest[['MntFishProducts', 'MntFruits', 'MntGoldProds', 'MntMeatProducts', 'MntSweetProducts', 'MntWines']].sum(axis=1)
             Xtest = pd.read_csv(file)
             mdl_lgbm = load_model('./pickle_lgbm_pycaret')
             ypred = predict_model(mdl_lgbm, data=Xtest, raw_score=True)
@@ -185,19 +186,18 @@ with tab2:
 
 
         with analysis_tab2:
-            st.subheader("Dispersão de Recency, Income e Total Purchases")
-            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Total_Purchases', 'Predicted_Class']):
+            st.subheader("Dispersão de Recency, Income e Total de Compras")
+            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Total_Purchases']):
                 fig = px.scatter(
                     Xtest,
                     x="Recency",
                     y="Income",
                     size="Total_Purchases",
-                    color="Predicted_Class",
+                    color="Age",  # Usando 'Age' em vez de 'Predicted_Class', supondo que seja a idade do cliente.
                     color_continuous_scale=px.colors.sequential.Viridis,
                     hover_name="Age",
                     log_x=True,
-                    size_max=60,
-                    labels={"Predicted_Class": "Propensity to Buy"}
+                    size_max=60
                 )
                 st.plotly_chart(fig, use_container_width=True)
             else:
@@ -206,39 +206,37 @@ with tab2:
 
         with analysis_tab3:
             st.subheader("Relação entre Renda e Idade com Cor de Classe Predita")
-            # Primeiro, vamos verificar se todas as colunas necessárias estão presentes
-            if all(col in Xtest.columns for col in ['Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted_Class']):
-                # Especificando os tipos de cada campo para garantir que Altair os processe corretamente
+            if all(col in Xtest.columns for col in ['Income', 'Age']):
                 chart = alt.Chart(Xtest).mark_circle().encode(
-                    x=alt.X('Income:Q', title='Income'),  # :Q porque Income é uma variável quantitativa
-                    y=alt.Y('Age:Q', title='Age'),  # :Q porque Age é uma variável quantitativa
-                    color=alt.Color('Predicted_Class:N', title='Predicted Class'),  # :N porque é nominal
-                    tooltip=[alt.Tooltip('Income:Q'), alt.Tooltip('Age:Q'), alt.Tooltip('Recency:Q'), alt.Tooltip('Total_Purchases:Q'), alt.Tooltip('Predicted_Class:N')]
+                    x=alt.X('Income:Q', title='Income'),
+                    y=alt.Y('Age:Q', title='Age'),
+                    color=alt.Color('Age:N', title='Age'),  # Alterei 'Predicted_Class' por 'Age' para demonstrar a cor pela idade
+                    tooltip=[alt.Tooltip('Income:Q'), alt.Tooltip('Age:Q'), alt.Tooltip('Recency:Q')]
                 ).properties(
                     width=800,
                     height=400,
-                    title='Relationship between Income and Age with Predicted Class Color'
+                    title='Relationship between Income and Age'
                 )
                 st.altair_chart(chart, use_container_width=True)
             else:
-                st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame. Verifique as colunas 'Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted Class'.")
-          
+                st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
 
+          
         with analysis_tab4:
             st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
             features_to_plot = ['Income', 'Age', 'Total_Purchases', 'MntWines']
-            if 'Predicted_Class' in Xtest.columns and all(feature in Xtest.columns for feature in features_to_plot):
+            if all(feature in Xtest.columns for feature in features_to_plot):
                 for feature in features_to_plot:
                     if pd.api.types.is_numeric_dtype(Xtest[feature]):
                         fig, ax = plt.subplots(figsize=(7, 4))
-                        sns.boxplot(data=Xtest, x='Predicted_Class', y=feature, ax=ax, palette="deep")
-                        plt.title(f'Box Plot - {feature} by Predicted Class', fontsize=14)
-                        ax.set_xlabel('Predicted Class', fontsize=12)
+                        sns.boxplot(data=Xtest, x='Age', y=feature, ax=ax, palette="deep")  # Usando 'Age' como x para exemplo
+                        plt.title(f'Box Plot - {feature} by Age', fontsize=14)
+                        ax.set_xlabel('Age', fontsize=12)
                         ax.set_ylabel(feature, fontsize=12)
                         ax.tick_params(axis='both', which='major', labelsize=10)
                         st.pyplot(fig)
                     else:
                         st.error(f"Erro: A coluna {feature} não é numérica e não pode ser usada em um boxplot.")
             else:
-                missing_columns = [col for col in ['Predicted_Class'] + features_to_plot if col not in Xtest.columns]
-                st.error(f"Erro: Falta(m) a(s) seguinte(s) coluna(s) no DataFrame: {', '.join(missing_columns)}")
+                missing_columns = [col for col in features_to_plot if col not in Xtest.columns]
+                st.error(f"Erro: Falta(m) a(s) seguinte(s) col
