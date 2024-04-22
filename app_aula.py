@@ -224,26 +224,29 @@ with tab2:
           
         with analysis_tab4:
             st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
-            # Removendo 'Total_Purchases' da lista
-            features_to_plot = ['Income', 'MntWines']  # Adicione mais recursos aqui se necessário
-        
-            # Verificando se todas as colunas restantes existem
+            features_to_plot = ['Income', 'MntWines']
+            
             if all(feature in Xtest.columns for feature in features_to_plot):
+                # Definindo o tamanho do gráfico para melhorar a legibilidade
+                plt.figure(figsize=(12, 6))
+        
                 for feature in features_to_plot:
-                    # Verificando se a coluna é numérica
                     if pd.api.types.is_numeric_dtype(Xtest[feature]):
-                        # Criando o boxplot com 'Age' no eixo x
-                        fig, ax = plt.subplots(figsize=(7, 4))
-                        sns.boxplot(data=Xtest, x='Age', y=feature, ax=ax, palette="deep")
-                        plt.title(f'Box Plot - {feature} by Age', fontsize=14)
-                        ax.set_xlabel('Age', fontsize=12)
-                        ax.set_ylabel(feature, fontsize=12)
-                        ax.tick_params(axis='both', which='major', labelsize=10)
-                        st.pyplot(fig)
+                        # Criando o boxplot com 'Age' no eixo x e ajustando a largura das caixas
+                        sns.boxplot(data=Xtest, x='Age', y=feature, palette="deep", width=0.5)
+                        plt.title(f'Box Plot - {feature} by Age', fontsize=16)
+                        plt.xlabel('Age', fontsize=14)
+                        plt.ylabel(feature, fontsize=14)
+                        plt.xticks(rotation=45)  # Rotacionando os labels do eixo x para melhor visualização
+                        plt.tight_layout()  # Ajusta automaticamente os parâmetros do subplot para que o subplot se ajuste à área da figura
+                        
+                        # Mostrando o gráfico após cada feature para não sobrepor gráficos
+                        st.pyplot(plt.gcf())
+                        plt.clf()  # Limpando a figura após o plot para evitar sobreposições no próximo loop
                     else:
                         st.error(f"Erro: A coluna {feature} não é numérica e não pode ser usada em um boxplot.")
             else:
-                # Informando quais colunas estão faltando
                 missing_columns = [col for col in features_to_plot if col not in Xtest.columns]
                 st.error(f"Erro: Falta(m) a(s) seguinte(s) coluna(s) no DataFrame: {', '.join(missing_columns)}")
+
 
