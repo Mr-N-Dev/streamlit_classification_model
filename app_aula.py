@@ -1,69 +1,70 @@
-#!pip install streamlit
-
 import streamlit as st
 import pandas as pd
-import numpy as np
-import pickle
+import seaborn as sns
+import matplotlib.pyplot as plt
 from pycaret.classification import *
+from sklearn.preprocessing import LabelEncoder
 
-st.set_page_config( page_title = 'Simulador - Case Ifood',
-                    page_icon = './images/logo_fiap.png',
-                    layout = 'wide',
-                    initial_sidebar_state = 'expanded')
+# Configuração inicial da página
+st.set_page_config(page_title='Simulador - Case Ifood',
+                   page_icon='./images/logo_fiap.png',
+                   layout='wide',
+                   initial_sidebar_state='expanded')
 
 st.title('Simulador - Conversão de Vendas')
 
-with st.expander('Descrição do App', expanded = False):
-    var_test = 5
-    # st.write(var_test)
-    # st.markdown(var_test)
-    st.write('O objetivo principal deste app .....')
+# Descrição do App
+with st.expander('Descrição do App', expanded=False):
+    st.write('O objetivo principal deste app é .....')
 
+# Sidebar com informações e escolha do tipo de entrada
 with st.sidebar:
     c1, c2 = st.columns(2)
-    c1.image('./images/logo_fiap.png', width = 100)
+    c1.image('./images/logo_fiap.png', width=100)
     c2.write('')
-    c2.subheader('Auto ML - Fiap [v3]')
+    c2.subheader('Auto ML - Fiap [v1]')
 
-    # database = st.selectbox('Fonte dos dados de entrada (X):', ('CSV', 'Online'))
     database = st.radio('Fonte dos dados de entrada (X):', ('CSV', 'Online'))
 
     if database == 'CSV':
         st.info('Upload do CSV')
         file = st.file_uploader('Selecione o arquivo CSV', type='csv')
 
-#Tela principal
-if database == 'CSV':
-    if file:
-        #carregamento do CSV
-        Xtest = pd.read_csv(file)
+# Abas principais
+tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
 
-        #carregamento / instanciamento do modelo pkl
-        mdl_lgbm = load_model('./pickle_lgbm_pycaret')
+with tab1:
+    if database == 'CSV':
+        if file:
+            #carregamento do CSV
+            Xtest = pd.read_csv(file)
 
-        #predict do modelo
-        ypred = predict_model(mdl_lgbm, data = Xtest, raw_score = True)
+            #carregamento / instanciamento do modelo pkl
+            mdl_lgbm = load_model('./pickle_lgbm_pycaret')
 
-        with st.expander('Visualizar CSV carregado:', expanded = False):
-            c1, _ = st.columns([2,4])
-            qtd_linhas = c1.slider('Visualizar quantas linhas do CSV:', 
-                                    min_value = 5, 
-                                    max_value = Xtest.shape[0], 
-                                    step = 10,
-                                    value = 5)
-            st.dataframe(Xtest.head(qtd_linhas))
+            #predict do modelo
+            ypred = predict_model(mdl_lgbm, data = Xtest, raw_score = True)
 
-        with st.expander('Visualizar Predições:', expanded = True):
-            c1, _, c2, c3 = st.columns([2,.5,1,1])
-            treshold = c1.slider('Treshold (ponto de corte para considerar predição como True)',
-                                min_value = 0.0,
-                                max_value = 1.0,
-                                step = .1,
-                                value = .5)
-            qtd_true = ypred.loc[ypred['Score_True'] > treshold].shape[0]
+            with st.expander('Visualizar CSV carregado:', expanded = False):
+                c1, _ = st.columns([2,4])
+                qtd_linhas = c1.slider('Visualizar quantas linhas do CSV:', 
+                                        min_value = 5, 
+                                        max_value = Xtest.shape[0], 
+                                        step = 10,
+                                        value = 5)
+                st.dataframe(Xtest.head(qtd_linhas))
 
-            c2.metric('Qtd clientes True', value = qtd_true)
-            c3.metric('Qtd clientes False', value = len(ypred) - qtd_true)
+            with st.expander('Visualizar Predições:', expanded = True):
+                c1, _, c2, c3 = st.columns([2,.5,1,1])
+                treshold = c1.slider('Treshold (ponto de corte para considerar predição como True)',
+                                    min_value = 0.0,
+                                    max_value = 1.0,
+                                    step = .1,
+                                    value = .5)
+                qtd_true = ypred.loc[ypred['Score_True'] > treshold].shape[0]
+
+                c2.metric('Qtd clientes True', value = qtd_true)
+                c3.metric('Qtd clientes False', value = len(ypred) - qtd_true)
 
             def color_pred(val):
                 color = 'olive' if val > treshold else 'orangered'
@@ -80,15 +81,89 @@ if database == 'CSV':
             csv = df_view.to_csv(sep = ';', decimal = ',', index = True)
             st.markdown(f'Shape do CSV a ser baixado: {df_view.shape}')
             st.download_button(label = 'Download CSV',
-                            data = csv,
-                            file_name = 'Predicoes.csv',
-                            mime = 'text/csv')
+                                data = csv,
+                                file_name = 'Predicoes.csv',
+                                mime = 'text/csv')
 
+        else:
+            st.warning('Arquivo CSV não foi carregado')
     else:
-        st.warning('Arquivo CSV não foi carregado')
-        # st.info('Arquivo CSV não foi carregado')
-        # st.error('Arquivo CSV não foi carregado')
-        # st.success('Arquivo CSV não foi carregado')
+        # Layout do aplicativo
+        st.title('Predição de Propensão de Compra')
 
-else:
-    st.error('Esta opção será desenvolvida no Entregável 1 da disciplina')
+        # Recolher os valores das features do usuário
+        accepted_cmp1 = st.number_input('AcceptedCmp1', min_value=0, max_value=1)
+        accepted_cmp2 = st.number_input('AcceptedCmp2', min_value=0, max_value=1)
+        accepted_cmp3 = st.number_input('AcceptedCmp3', min_value=0, max_value=1)
+        accepted_cmp4 = st.number_input('AcceptedCmp4', min_value=0, max_value=1)
+        accepted_cmp5 = st.number_input('AcceptedCmp5', min_value=0, max_value=1)
+        age = st.number_input('Age', min_value=0)
+        complain = st.number_input('Complain', min_value=0, max_value=1)
+        education = st.selectbox('Education', ['Basic','Graduation','2n Cycle', 'Master', 'PhD'])
+        income = st.number_input('Income', min_value=0)
+        kidhome = st.number_input('Kidhome', min_value=0, max_value=10)
+        marital_status = st.selectbox('Marital Status', ['Single', 'Together', 'Married', 'Divorced', 'Widow'])
+        mnt_fish_products = st.number_input('MntFishProducts', min_value=0)
+        mnt_fruits = st.number_input('MntFruits', min_value=0)
+        mnt_gold_prods = st.number_input('MntGoldProds', min_value=0)
+        mnt_meat_products = st.number_input('MntMeatProducts', min_value=0)
+        mnt_sweet_products = st.number_input('MntSweetProducts', min_value=0)
+        mnt_wines = st.number_input('MntWines', min_value=0)
+        num_catalog_purchases = st.number_input('NumCatalogPurchases', min_value=0)
+        num_deals_purchases = st.number_input('NumDealsPurchases', min_value=0)
+        num_store_purchases = st.number_input('NumStorePurchases', min_value=0)
+        num_web_purchases = st.number_input('NumWebPurchases', min_value=0)
+        num_web_visits_month = st.number_input('NumWebVisitsMonth', min_value=0)
+        recency = st.number_input('Recency', min_value=0)
+        teenhome = st.number_input('Teenhome', min_value=0)
+        time_customer = st.number_input('Time_Customer', min_value=0)
+
+        # Slider para escolher o threshold
+        threshold = st.slider('Escolha o Threshold', min_value=0.0, max_value=1.0, step=0.01, value=0.5)
+
+        # Criar DataFrame com os valores inseridos pelo usuário
+        user_data = pd.DataFrame({
+            'AcceptedCmp1': [accepted_cmp1],
+            'AcceptedCmp2': [accepted_cmp2],
+            'AcceptedCmp3': [accepted_cmp3],
+            'AcceptedCmp4': [accepted_cmp4],
+            'AcceptedCmp5': [accepted_cmp5],
+            'Age': [age],
+            'Complain': [complain],
+            'Education': [education],
+            'Income': [income],
+            'Kidhome': [kidhome],
+            'Marital_Status': [marital_status],
+            'MntFishProducts': [mnt_fish_products],
+            'MntFruits': [mnt_fruits],
+            'MntGoldProds': [mnt_gold_prods],
+            'MntMeatProducts': [mnt_meat_products],
+            'MntSweetProducts': [mnt_sweet_products],
+            'MntWines': [mnt_wines],
+            'NumCatalogPurchases': [num_catalog_purchases],
+            'NumDealsPurchases': [num_deals_purchases],
+            'NumStorePurchases': [num_store_purchases],
+            'NumWebPurchases': [num_web_purchases],
+            'NumWebVisitsMonth': [num_web_visits_month],
+            'Recency': [recency],
+            'Teenhome': [teenhome],
+            'Time_Customer': [time_customer]
+        })
+
+        label_encoder = LabelEncoder()
+        user_data['Education'] = \
+            label_encoder.fit_transform(user_data['Education'])
+        user_data['Marital_Status'] = \
+            label_encoder.fit_transform(user_data['Marital_Status'])
+
+        # Botão para fazer a predição
+        if st.button('Prever Propensão de Compra'):
+            mdl_rf = load_model('./pickle_lgbm_pycaret')
+            ypred = predict_model(mdl_rf, data=user_data, raw_score=True)
+            prediction_proba = mdl_rf.predict_proba(user_data)[:, 1]
+            prediction = (prediction_proba > threshold).astype(int)
+            st.subheader('Resultado da Predição')
+            if prediction == 1:
+                st.success('Este cliente é propenso a comprar o produto da campanha.')
+            else:
+                st.error('Este cliente não é propenso a comprar o produto da campanha.')
