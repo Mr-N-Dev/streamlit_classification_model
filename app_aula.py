@@ -187,22 +187,22 @@ with tab2:
 
         with analysis_tab2:
             st.subheader("Dispersão de Recency e Income")
-            # Verifica se as colunas Recency, Income e Age existem no DataFrame
-            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Age']):
+            # Verifica se as colunas Recency, Income, Age e Predicted_Class existem no DataFrame
+            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Predicted_Class', 'Age']):
                 fig = px.scatter(
                     Xtest,
                     x="Recency",
                     y="Income",
-                    color="Age",  # Colorindo os pontos baseado na idade do cliente
+                    color="Predicted_Class",  # Usando Predicted_Class para cor
                     color_continuous_scale=px.colors.sequential.Viridis,  # Escolhendo uma escala de cor
-                    hover_name="Age",  # Mostrando a idade ao passar o mouse sobre os pontos
-                    log_x=True,  # Usando escala logarítmica para o eixo X se necessário
-                    title="Relação entre Recência e Renda Colorida por Idade"
+                    hover_name="Age",  # Mostrando a idade no hover
+                    log_x=True,  # Opcional: Escala logarítmica para Recency
+                    labels={"Predicted_Class": "Propensity to Buy"}  # Renomeando a legenda
                 )
+                fig.update_layout(title="Relação entre Recência e Renda Colorida por Propensão à Compra")
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
-
 
 
         with analysis_tab3:
