@@ -4,6 +4,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pycaret.classification import *
 from sklearn.preprocessing import LabelEncoder
+import plotly.express as px
+import altair as alt
+
 
 # Configuração inicial da página
 st.set_page_config(page_title='Simulador - Case Ifood',
@@ -167,3 +170,62 @@ with tab1:
                 st.success('Este cliente é propenso a comprar o produto da campanha.')
             else:
                 st.error('Este cliente não é propenso a comprar o produto da campanha.')
+              
+with tab2:
+  if df == 'CSV' and file and 'Xtest' in locals():
+      st.header("Análise Detalhada")
+      analysis_tab1, analysis_tab2, analysis_tab3, analysis_tab4 = st.tabs(
+          ["Gráfico de Dispersão Plotly 1", "Gráfico de Dispersão Plotly 2", "Gráfico Altair", "Box Plot Seaborn"])
+
+      with analysis_tab1:
+          st.subheader("Relação entre Recency e Income")
+          fig = px.scatter(
+              df,
+              x="Recency",
+              y="Income",
+              color="Income",
+              color_continuous_scale="reds"
+          )
+          st.plotly_chart(fig, use_container_width=True)
+
+      with analysis_tab2:
+          st.subheader("Dispersão de Recency, Income e Total Purchases")
+          fig = px.scatter(
+              df,
+              x="Recency",
+              y="Income",
+              size="Total_Purchases",
+              color="Predicted_Class",
+              color_continuous_scale=px.colors.sequential.Viridis,
+              hover_name="Age",
+              log_x=True,
+              size_max=60,
+              labels={"Predicted_Class": "Propensity to Buy"}
+          )
+          st.plotly_chart(fig, use_container_width=True)
+
+      with analysis_tab3:
+          st.subheader("Relação entre Renda e Idade com Cor de Classe Predita")
+          chart = alt.Chart(df).mark_circle().encode(
+              x='Income',
+              y='Age',
+              color='Predicted_Class:N',
+              tooltip=['Income', 'Age', 'Recency', 'Total_Purchases', 'Predicted_Class']
+          ).properties(
+              width=800,
+              height=400,
+              title='Relationship between Income and Age with Predicted Class Color'
+          )
+          st.altair_chart(chart, use_container_width=True)
+
+      with analysis_tab4:
+          st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
+          features_to_plot = ['Income', 'Age', 'Total_Purchases', 'MntWines'] 
+          for feature in features_to_plot:
+              fig, ax = plt.subplots(figsize=(7, 4))
+              sns.boxplot(data=Xtest, x='Predicted_Class', y=feature, ax=ax, palette="deep")
+              plt.title(f'Box Plot - {feature} by Predicted Class', fontsize=14)
+              ax.set_xlabel('Predicted Class', fontsize=12)
+              ax.set_ylabel(feature, fontsize=12)
+              ax.tick_params(axis='both', which='major', labelsize=10)
+              st.pyplot(fig)
