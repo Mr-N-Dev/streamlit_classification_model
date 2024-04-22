@@ -36,7 +36,8 @@ with st.sidebar:
 # Abas principais
 tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
 
-with tab1:
+with tab1: 
+    file = st.file_uploader('Selecione o arquivo CSV', type='csv')
     if database == 'CSV':
         if file:
             #carregamento do CSV
