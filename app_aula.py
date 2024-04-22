@@ -174,6 +174,7 @@ with tab1:
               
 with tab2:
   if df == 'CSV' and file and 'Xtest' in locals():
+      Xtest = pd.read_csv(file)
       st.header("Análise Detalhada")
       analysis_tab1, analysis_tab2, analysis_tab3, analysis_tab4 = st.tabs(
           ["Gráfico de Dispersão Plotly 1", "Gráfico de Dispersão Plotly 2", "Gráfico Altair", "Box Plot Seaborn"])
