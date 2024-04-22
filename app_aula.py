@@ -32,17 +32,7 @@ with st.sidebar:
     if database == 'CSV':
         st.info('Upload do CSV')
         file = st.file_uploader('Selecione o arquivo CSV', type='csv')
-        if file:
-            Xtest = pd.read_csv(file)
-            # Verifique e crie a coluna Total_Purchases se as colunas necessárias estiverem presentes
-            purchase_columns = ['MntFishProducts', 'MntFruits', 'MntGoldProds', 'MntMeatProducts', 'MntSweetProducts', 'MntWines']
-            if all(col in Xtest.columns for col in purchase_columns):
-                Xtest['Total_Purchases'] = Xtest[purchase_columns].sum(axis=1)
-            else:
-                missing_cols = [col for col in purchase_columns if col not in Xtest.columns]
-                st.error(f"Missing columns in the CSV file: {', '.join(missing_cols)}")
-                # Saia cedo se colunas estão faltando
-                st.stop()
+
 
 # Abas principais
 tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
@@ -196,22 +186,23 @@ with tab2:
 
 
         with analysis_tab2:
-            st.subheader("Dispersão de Recency, Income e Total de Compras")
-            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Total_Purchases']):
+            st.subheader("Dispersão de Recency e Income")
+            # Verifica se as colunas Recency, Income e Age existem no DataFrame
+            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Age']):
                 fig = px.scatter(
                     Xtest,
                     x="Recency",
                     y="Income",
-                    size="Total_Purchases",
-                    color="Age",  # Usando 'Age' em vez de 'Predicted_Class', supondo que seja a idade do cliente.
-                    color_continuous_scale=px.colors.sequential.Viridis,
-                    hover_name="Age",
-                    log_x=True,
-                    size_max=60
+                    color="Age",  # Colorindo os pontos baseado na idade do cliente
+                    color_continuous_scale=px.colors.sequential.Viridis,  # Escolhendo uma escala de cor
+                    hover_name="Age",  # Mostrando a idade ao passar o mouse sobre os pontos
+                    log_x=True,  # Usando escala logarítmica para o eixo X se necessário
+                    title="Relação entre Recência e Renda Colorida por Idade"
                 )
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
+
 
 
         with analysis_tab3:
