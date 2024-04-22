@@ -187,19 +187,18 @@ with tab2:
 
         with analysis_tab2:
             st.subheader("Dispersão de Recency e Income")
-            # Verifica se as colunas Recency, Income, Age e Predicted_Class existem no DataFrame
-            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Predicted_Class', 'Age']):
+            if 'Recency' in Xtest.columns and 'Income' in Xtest.columns and 'Age' in Xtest.columns:
                 fig = px.scatter(
                     Xtest,
                     x="Recency",
                     y="Income",
-                    color="Predicted_Class",  # Usando Predicted_Class para cor
+                    color="Age",  # Usando Age para cor
                     color_continuous_scale=px.colors.sequential.Viridis,  # Escolhendo uma escala de cor
                     hover_name="Age",  # Mostrando a idade no hover
                     log_x=True,  # Opcional: Escala logarítmica para Recency
-                    labels={"Predicted_Class": "Propensity to Buy"}  # Renomeando a legenda
+                    labels={"Age": "Idade"}  # Renomeando a legenda
                 )
-                fig.update_layout(title="Relação entre Recência e Renda Colorida por Propensão à Compra")
+                fig.update_layout(title="Relação entre Recência e Renda Colorida por Idade")
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
@@ -225,12 +224,17 @@ with tab2:
           
         with analysis_tab4:
             st.subheader("Box Plot para Análise Detalhada das Características dos Clientes")
-            features_to_plot = ['Income', 'Age', 'Total_Purchases', 'MntWines']
+            # Removendo 'Total_Purchases' da lista
+            features_to_plot = ['Income', 'MntWines']  # Adicione mais recursos aqui se necessário
+        
+            # Verificando se todas as colunas restantes existem
             if all(feature in Xtest.columns for feature in features_to_plot):
                 for feature in features_to_plot:
+                    # Verificando se a coluna é numérica
                     if pd.api.types.is_numeric_dtype(Xtest[feature]):
+                        # Criando o boxplot com 'Age' no eixo x
                         fig, ax = plt.subplots(figsize=(7, 4))
-                        sns.boxplot(data=Xtest, x='Age', y=feature, ax=ax, palette="deep")  # Usando 'Age' como x para exemplo
+                        sns.boxplot(data=Xtest, x='Age', y=feature, ax=ax, palette="deep")
                         plt.title(f'Box Plot - {feature} by Age', fontsize=14)
                         ax.set_xlabel('Age', fontsize=12)
                         ax.set_ylabel(feature, fontsize=12)
@@ -239,6 +243,7 @@ with tab2:
                     else:
                         st.error(f"Erro: A coluna {feature} não é numérica e não pode ser usada em um boxplot.")
             else:
+                # Informando quais colunas estão faltando
                 missing_columns = [col for col in features_to_plot if col not in Xtest.columns]
                 st.error(f"Erro: Falta(m) a(s) seguinte(s) coluna(s) no DataFrame: {', '.join(missing_columns)}")
 
