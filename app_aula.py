@@ -39,7 +39,6 @@ tab1, tab2 = st.tabs(["Predições", "Análise Detalhada"])
 with tab1:
     if database == 'CSV':
         if file:
-            Xtest['Total_Purchases'] = Xtest[['MntFishProducts', 'MntFruits', 'MntGoldProds', 'MntMeatProducts', 'MntSweetProducts', 'MntWines']].sum(axis=1)
             Xtest = pd.read_csv(file)
             mdl_lgbm = load_model('./pickle_lgbm_pycaret')
             ypred = predict_model(mdl_lgbm, data=Xtest, raw_score=True)
