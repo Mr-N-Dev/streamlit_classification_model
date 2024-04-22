@@ -183,21 +183,27 @@ with tab2:
             )
             st.plotly_chart(fig, use_container_width=True)
 
+
         with analysis_tab2:
             st.subheader("Dispersão de Recency, Income e Total Purchases")
-            fig = px.scatter(
-                Xtest,
-                x="Recency",
-                y="Income",
-                size="Total_Purchases",
-                color="Predicted_Class",
-                color_continuous_scale=px.colors.sequential.Viridis,
-                hover_name="Age",
-                log_x=True,
-                size_max=60,
-                labels={"Predicted_Class": "Propensity to Buy"}
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            if all(col in Xtest.columns for col in ['Recency', 'Income', 'Total_Purchases', 'Predicted_Class']):
+                fig = px.scatter(
+                    Xtest,
+                    x="Recency",
+                    y="Income",
+                    size="Total_Purchases",
+                    color="Predicted_Class",
+                    color_continuous_scale=px.colors.sequential.Viridis,
+                    hover_name="Age",
+                    log_x=True,
+                    size_max=60,
+                    labels={"Predicted_Class": "Propensity to Buy"}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.error("Uma ou mais colunas necessárias não foram encontradas no DataFrame.")
+
+      
 
         with analysis_tab3:
             st.subheader("Relação entre Renda e Idade com Cor de Classe Predita")
