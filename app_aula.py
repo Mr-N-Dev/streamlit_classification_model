@@ -228,7 +228,7 @@ with tab2:
             
             if all(feature in Xtest.columns for feature in features_to_plot):
                 # Definindo o tamanho do gráfico para melhorar a legibilidade
-                plt.figure(figsize=(12, 6))
+                plt.figure(figsize=(8, 6))
         
                 for feature in features_to_plot:
                     if pd.api.types.is_numeric_dtype(Xtest[feature]):
